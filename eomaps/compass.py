@@ -41,16 +41,17 @@ class Compass:
         self._last_patch_lw = None
 
     def __call__(
-        self,
-        pos=None,
-        pos_transform="axes",
-        scale=10,
-        style="compass",
-        patch=None,
-        txt="N",
-        pickable=True,
-        layer=None,
-        ignore_invalid_angles=False,
+            self,
+            pos=None,
+            pos_transform="axes",
+            scale=10,
+            style="compass",
+            patch=None,
+            txt="N",
+            txt_color='k',
+            pickable=True,
+            layer=None,
+            ignore_invalid_angles=False,
     ):
         """
         Add a "compass" or "north-arrow" to the map.
@@ -147,6 +148,7 @@ class Compass:
         self._style = style
         self._patch = patch
         self._txt = txt
+        self._txt_color = txt_color
         self._scale = scale
         # remember the dpi at the time the compass was initialized
         self._init_dpi = self._m.f.dpi
@@ -231,22 +233,22 @@ class Compass:
 
         for t in self._txt:
             if t == "N":
-                txt = PathPatch(TextPath((-0.75, 3.2), "N", size=2), fc="k", ec="none")
+                txt = PathPatch(TextPath((-0.75, 3.2), "N", size=2), fc=self._txt_color, ec="none")
                 art.add_artist(txt)
             elif self._style == "compass":
                 if t == "E":
                     txt = PathPatch(
-                        TextPath((3.3, -0.75), "E", size=2), fc="k", ec="none"
+                        TextPath((3.3, -0.75), "E", size=2), fc=self._txt_color, ec="none"
                     )
                     art.add_artist(txt)
                 elif t == "S":
                     txt = PathPatch(
-                        TextPath((-0.75, -4.7), "S", size=2), fc="k", ec="none"
+                        TextPath((-0.75, -4.7), "S", size=2), fc=self._txt_color, ec="none"
                     )
                     art.add_artist(txt)
                 elif t == "W":
                     txt = PathPatch(
-                        TextPath((-5.2, -0.75), "W", size=2), fc="k", ec="none"
+                        TextPath((-5.2, -0.75), "W", size=2), fc=self._txt_color, ec="none"
                     )
                     art.add_artist(txt)
 

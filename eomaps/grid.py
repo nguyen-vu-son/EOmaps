@@ -19,7 +19,7 @@ _log = logging.getLogger(__name__)
 def _ccw(A, B, C):
     # determine if 3 points are listed in a counter-clockwise order
     return (C[..., 1] - A[..., 1]) * (B[..., 0] - A[..., 0]) > (
-        B[..., 1] - A[..., 1]
+            B[..., 1] - A[..., 1]
     ) * (C[..., 0] - A[..., 0])
 
 
@@ -61,7 +61,7 @@ class GridLines:
     """
 
     def __init__(
-        self, m, d=None, auto_n=10, layer=None, bounds=None, n=100, dynamic=False
+            self, m, d=None, auto_n=10, layer=None, bounds=None, n=100, dynamic=False
     ):
         self.m = m._proxy(m)
 
@@ -280,7 +280,7 @@ class GridLines:
             return self._get_auto_grid_lines()
 
     def _round_up(self, a, precision=0):
-        return np.true_divide(np.ceil(a * 10**precision), 10**precision)
+        return np.true_divide(np.ceil(a * 10 ** precision), 10 ** precision)
 
     def _get_auto_grid_lines(self):
         if isinstance(self.auto_n, tuple):
@@ -417,16 +417,16 @@ class GridLines:
             self.m.redraw(self.layer)
 
     def add_labels(
-        self,
-        where="tblr",
-        offset=10,
-        precision=2,
-        every=None,
-        exclude="corners",
-        labels=None,
-        rotation=0,
-        rotation_relative=True,
-        **kwargs,
+            self,
+            where="tblr",
+            offset=10,
+            precision=2,
+            every=None,
+            exclude="corners",
+            labels=None,
+            rotation=0,
+            rotation_relative=True,
+            **kwargs,
     ):
         """
         Add labels to the gridlines.
@@ -502,7 +502,7 @@ class GridLines:
             The class that handles the drawing of the grid-labels.
 
         """
-        gl = GridLabels(
+        self.gl = GridLabels(
             self,
             where=where,
             offset=offset,
@@ -514,32 +514,102 @@ class GridLines:
             rotation_relative=rotation_relative,
             **kwargs,
         )
-        gl.add_labels()
+        self.gl.add_labels()
 
         # remember attached labels
-        self._grid_labels.append(gl)
+        self._grid_labels.append(self.gl)
 
         if self._dynamic is False:
             self.m.redraw(self.layer)
 
-        return gl
+        return self.gl
+
+    def get_lonlabels(self):
+        """
+        :return:
+        lonlabels : list
+                List of longitude labels for the grid.
+        """
+        return list(self.gl._lonlabels)
+
+    def get_lonticks(self):
+        """
+        :return:
+        lonticks : list
+                List of longitude ticks for the grid.
+        """
+        # Update grid label
+        self.gl._redraw()
+
+        # Add the grid labels
+        output = list(self.gl._lonticks)
+        # output = []
+        # for label in self.gl._lonlabels:
+        #     if 'E' in label:
+        #         output.append(np.float_(label.split('°')[0]))
+        #     elif 'W' in label:
+        #         output.append(-np.float_(label.split('°')[0]))
+        #     else:
+        #         output.append(0)
+
+        # Add the two extend
+        output = [self.gl._last_extent[0]] + output
+        output = output + [self.gl._last_extent[1]]
+
+        return output
+
+    def get_latlabels(self):
+        """
+        Return the latitude labels used for the grid
+        :return:
+        latlabels : list
+                List of longitude labels for the grid.
+        """
+        return list(self.gl._latlabels)
+
+    def get_latticks(self):
+        """
+        Return the latitude ticks including the extends
+        :return:
+        latticks : list
+                List of longitude ticks for the grid.
+        """
+        # Update grid label
+        self.gl._redraw()
+
+        # Add the grid labels
+        output = list(self.gl._latticks)
+        # output = []
+        # for label in self.gl._latlabels:
+        #     if 'N' in label:
+        #         output.append(np.float_(label.split('°')[0]))
+        #     elif 'S' in label:
+        #         output.append(-np.float_(label.split('°')[0]))
+        #     else:
+        #         output.append(0)
+
+        # Add the two extend
+        output = [self.gl._last_extent[2]] + output
+        output = output + [self.gl._last_extent[3]]
+
+        return output
 
 
 class GridLabels:
     """Class to draw grid-labels."""
 
     def __init__(
-        self,
-        g,
-        where="tblr",
-        offset=10,
-        precision=2,
-        every=None,
-        exclude="corners",
-        labels=None,
-        rotation=0,
-        rotation_relative=True,
-        **kwargs,
+            self,
+            g,
+            where="tblr",
+            offset=10,
+            precision=2,
+            every=None,
+            exclude="corners",
+            labels=None,
+            rotation=0,
+            rotation_relative=True,
+            **kwargs,
     ):
         self._g = g
         self._texts = []
@@ -559,6 +629,10 @@ class GridLabels:
             self._n_pts = slice(0, 2, 1)
 
         self._labels = labels
+        self._lonticks = set()
+        self._latticks = set()
+        self._lonlabels = set()
+        self._latlabels = set()
         self._rotation_relative = rotation_relative
         self._precision = precision
         self._every = every
@@ -645,12 +719,12 @@ class GridLabels:
             dpi = m.f.dpi
 
             if (
-                self._last_ax_pos is not None
-                and self._last_extent is not None
-                and self._last_dpi is not None
-                and self._last_dpi == dpi
-                and self._last_extent == extent
-                and self._last_ax_pos.bounds == pos.bounds
+                    self._last_ax_pos is not None
+                    and self._last_extent is not None
+                    and self._last_dpi is not None
+                    and self._last_dpi == dpi
+                    and self._last_extent == extent
+                    and self._last_ax_pos.bounds == pos.bounds
             ):
                 return
 
@@ -740,9 +814,9 @@ class GridLabels:
             if label in self._exclude[axis]:
                 continue
 
-            label = np.format_float_positional(
-                label, precision=self._precision, trim="-", fractional=True
-            ) + ("°E" if axis == 0 else "°N")
+            # label = np.format_float_positional(
+            #     label, precision=self._precision, trim="-", fractional=True
+            # ) + ("°E" if axis == 0 else "°N")
 
             l0x, l0y, l1x, l1y, b0x, b0y, b1x, b1y = np.broadcast_arrays(
                 l[:-1, 0],
@@ -776,8 +850,8 @@ class GridLabels:
 
                         line_in_bnds = l[:, 1].clip(bndmin[1], bndmax[1])
                         line_center = (
-                            np.nanmin(line_in_bnds) + np.nanmax(line_in_bnds)
-                        ) / 2
+                                              np.nanmin(line_in_bnds) + np.nanmax(line_in_bnds)
+                                      ) / 2
                         top = y > line_center
                         if top:
                             if not ("t" in self._where):
@@ -791,8 +865,8 @@ class GridLabels:
 
                         line_in_bnds = l[:, 0].clip(bndmin[0], bndmax[0])
                         line_center = (
-                            np.nanmin(line_in_bnds) + np.nanmax(line_in_bnds)
-                        ) / 2
+                                              np.nanmin(line_in_bnds) + np.nanmax(line_in_bnds)
+                                      ) / 2
                         right = x > line_center
                         if right:
                             if not ("r" in self._where):
@@ -811,18 +885,44 @@ class GridLabels:
 
                 # add offset to label positions
                 x = (
-                    x
-                    - self._relative_offset * np.sin(r) * m.f.dpi / self._default_dpi
-                    + self._offset[0]
+                        x
+                        - self._relative_offset * np.sin(r) * m.f.dpi / self._default_dpi
+                        + self._offset[0]
                 )
                 y = (
-                    y
-                    + self._relative_offset * np.cos(r) * m.f.dpi / self._default_dpi
-                    + self._offset[1]
+                        y
+                        + self._relative_offset * np.cos(r) * m.f.dpi / self._default_dpi
+                        + self._offset[1]
                 )
 
                 # round to avoid "jumpy" labels
                 x, y = np.round((x, y))
+
+                # Save the kept grid ticks
+                if axis == 0:
+                    self._lonticks.add(label)
+                else:
+                    self._latticks.add(label)
+
+                # Format labels
+
+                # Determine direction
+                if round(label, self._precision) == 0:
+                    direction = "°"  # No direction for 0
+                elif axis == 0:  # Longitude
+                    direction = "°E" if label > 0 else "°W"
+                else:  # Latitude
+                    direction = "°N" if label > 0 else "°S"
+
+                label = np.format_float_positional(
+                    abs(label), precision=self._precision, trim="-", fractional=True
+                ) + direction
+
+                # Save the kept grid ticks
+                if axis == 0:
+                    self._lonlabels.add(label)
+                else:
+                    self._latlabels.add(label)
 
                 intersection_points.setdefault(label, list()).append([x, y, r])
 
@@ -917,6 +1017,10 @@ class GridLabels:
                         m.BM.add_bg_artist(t, layer=self._g.layer, draw=False)
                     self._texts.append(t)
 
+            return list(intersection_points.keys())
+        else:
+            return []
+
     def add_labels(self):
         """
         Add labels to the grid.
@@ -937,7 +1041,6 @@ class GridLabels:
         for axis in use_axes:
             self._add_axis_labels(lines=lines, axis=axis)
 
-
 class GridFactory:
     """Class to handle grids on a map."""
 
@@ -947,17 +1050,17 @@ class GridFactory:
         self.m.BM._before_fetch_bg_actions.append(self._update_autogrid)
 
     def add_grid(
-        self,
-        d=None,
-        auto_n=10,
-        n=100,
-        bounds=None,
-        layer=None,
-        *,
-        m=None,
-        labels=False,
-        dynamic=False,
-        **kwargs,
+            self,
+            d=None,
+            auto_n=10,
+            n=100,
+            bounds=None,
+            layer=None,
+            *,
+            m=None,
+            labels=False,
+            dynamic=False,
+            **kwargs,
     ):
         """
         Add gridlines to the map.

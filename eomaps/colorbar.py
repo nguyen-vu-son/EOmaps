@@ -656,7 +656,7 @@ class ColorBar(ColorBarBase):
         """
         # if precision=None the shortest representation of the number is used
         return np.format_float_positional(
-            self._m._decode_values(x), precision=self._tick_precision
+            self._m._decode_values(x), precision=self._tick_precision, trim="-"
         )
 
     def _classified_cb_tick_formatter(self, x, pos, precision=None):
