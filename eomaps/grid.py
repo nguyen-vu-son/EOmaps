@@ -905,7 +905,6 @@ class GridLabels:
                     self._latticks.add(label)
 
                 # Format labels
-
                 # Determine direction
                 if round(label, self._precision) == 0:
                     direction = "°"  # No direction for 0
