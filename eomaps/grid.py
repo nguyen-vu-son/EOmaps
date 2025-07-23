@@ -1003,8 +1003,8 @@ class GridLabels:
                         transform=transf,  # None,
                         animated=True,
                         rotation=r,
-                        ha="center",
-                        va="center",
+                        ha="left" if r==0 else "center",
+                        va="center" if r==0 else "bottom",
                         **txt_kwargs,
                     )
                     # exclude artist in companion widget editor
