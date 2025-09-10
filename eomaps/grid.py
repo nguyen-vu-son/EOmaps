@@ -530,7 +530,27 @@ class GridLines:
         lonlabels : list
                 List of longitude labels for the grid.
         """
-        return list(self.gl._lonlabels)
+
+        # re arrange
+        output=['']
+        for tick in self.get_lonticks()[1:-1]:
+            # Get coord direction
+            if tick==0:
+                direction = "°"  # No direction for 0
+            else:  # Longitude
+                direction = "°E" if tick > 0 else "°W"
+
+            # Generate label
+            label = np.format_float_positional(
+                abs(tick), precision=2, trim="-", fractional=True
+            ) + direction
+
+            # Save label
+            output.append(label)
+
+        output.append('')
+
+        return output
 
     def get_lonticks(self):
         """
@@ -543,20 +563,12 @@ class GridLines:
 
         # Add the grid labels
         output = list(self.gl._lonticks)
-        # output = []
-        # for label in self.gl._lonlabels:
-        #     if 'E' in label:
-        #         output.append(np.float_(label.split('°')[0]))
-        #     elif 'W' in label:
-        #         output.append(-np.float_(label.split('°')[0]))
-        #     else:
-        #         output.append(0)
 
         # Add the two extend
         output = [self.gl._last_extent[0]] + output
         output = output + [self.gl._last_extent[1]]
 
-        return output
+        return sorted(output)
 
     def get_latlabels(self):
         """
@@ -565,7 +577,26 @@ class GridLines:
         latlabels : list
                 List of longitude labels for the grid.
         """
-        return list(self.gl._latlabels)
+
+        output=['']
+        for tick in self.get_latticks()[1:-1]:
+            # Get coord direction
+            if tick==0:
+                direction = "°"  # No direction for 0
+            else:  # Longitude
+                direction = "°N" if tick > 0 else "°S"
+
+            # Generate label
+            label = np.format_float_positional(
+                abs(tick), precision=2, trim="-", fractional=True
+            ) + direction
+
+            # Save label
+            output.append(label)
+
+        output.append('')
+
+        return output
 
     def get_latticks(self):
         """
@@ -592,8 +623,7 @@ class GridLines:
         output = [self.gl._last_extent[2]] + output
         output = output + [self.gl._last_extent[3]]
 
-        return output
-
+        return sorted(output)
 
 class GridLabels:
     """Class to draw grid-labels."""
@@ -1003,8 +1033,8 @@ class GridLabels:
                         transform=transf,  # None,
                         animated=True,
                         rotation=r,
-                        ha="left" if r==0 else "center",
-                        va="center" if r==0 else "bottom",
+                        ha="left" if r == 0 else "center",
+                        va="center" if r == 0 else "bottom",
                         **txt_kwargs,
                     )
                     # exclude artist in companion widget editor
@@ -1039,6 +1069,7 @@ class GridLabels:
 
         for axis in use_axes:
             self._add_axis_labels(lines=lines, axis=axis)
+
 
 class GridFactory:
     """Class to handle grids on a map."""
